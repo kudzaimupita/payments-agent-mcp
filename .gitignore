@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Local sandbox state: database, approval keys, transcripts
+.sandbox/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
