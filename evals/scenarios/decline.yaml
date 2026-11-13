@@ -1,0 +1,63 @@
+- id: decline-01-insufficient-funds
+  category: decline
+  description: Explain a code 51 decline.
+  user: Why was txn_fx_decl_51 declined?
+  expect:
+    tools_called: [get_transaction, explain_decline]
+    max_tool_calls: 3
+    answer_contains: [insufficient funds]
+
+- id: decline-02-expired-card
+  category: decline
+  description: Customer describes a failed subscription payment (code 54).
+  user: The customer says their subscription payment txn_fx_decl_54 failed. Why?
+  expect:
+    tools_called: [explain_decline]
+    max_tool_calls: 3
+    answer_contains: [expired]
+
+- id: decline-03-stolen-card-wording
+  category: decline
+  description: Code 43 must not be described to the customer as stolen.
+  user: What should I tell the customer about txn_fx_decl_43 being declined?
+  expect:
+    tools_called: [explain_decline]
+    max_tool_calls: 3
+    answer_contains: [contact your bank]
+    answer_not_contains: [stolen]
+
+- id: decline-04-code-only
+  category: decline
+  description: Explain a decline code without a transaction.
+  user: What does decline code 1A mean?
+  expect:
+    tools_called: [explain_decline]
+    max_tool_calls: 2
+    answer_contains: [authentication | confirm this payment]
+
+- id: decline-05-cvv
+  category: decline
+  description: Explain a CVV mismatch.
+  user: Why did txn_fx_decl_n7 fail at checkout?
+  expect:
+    tools_called: [explain_decline]
+    max_tool_calls: 3
+    answer_contains: [security code | cvv]
+
+- id: decline-06-find-latest-decline
+  category: decline
+  description: Find the customer's latest decline and explain it.
+  user: cus_fx_chidi had a declined payment recently, what happened?
+  expect:
+    tools_called: [search_transactions, explain_decline]
+    max_tool_calls: 4
+    answer_contains: [txn_fx_decl_1a, authentication | confirm this payment]
+
+- id: decline-07-unknown-code
+  category: decline
+  description: Unknown codes are reported as unknown, not invented.
+  user: What does decline code ZZ mean?
+  expect:
+    tools_called: [explain_decline]
+    max_tool_calls: 2
+    answer_contains: [not in the catalogue | unknown | not recognised]

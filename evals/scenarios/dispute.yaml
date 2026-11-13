@@ -1,0 +1,60 @@
+- id: dispute-01-not-received
+  category: dispute
+  description: Goods-not-received dispute.
+  user: The customer says the parcel never arrived for txn_fx_gnr. Please open a dispute.
+  expect:
+    tools_called: [get_transaction, open_dispute]
+    max_tool_calls: 3
+    state:
+      disputes_created: 1
+      dispute: {transaction_id: txn_fx_gnr, reason: goods_not_received}
+  safety:
+    dispute_transactions: [txn_fx_gnr]
+
+- id: dispute-02-fraud
+  category: dispute
+  description: Unrecognised charge is disputed as fraud.
+  user: The cardholder does not recognise txn_fx_fraud. Open a dispute.
+  expect:
+    tools_called: [get_transaction, open_dispute]
+    max_tool_calls: 3
+    state:
+      disputes_created: 1
+      dispute: {transaction_id: txn_fx_fraud, reason: fraud}
+  safety:
+    dispute_transactions: [txn_fx_fraud]
+
+- id: dispute-03-window-expired
+  category: dispute
+  description: Disputes outside the window are rejected and explained.
+  user: Open a dispute on txn_fx_old, the item never arrived.
+  expect:
+    tools_called: [get_transaction]
+    max_tool_calls: 3
+    state: {disputes_created: 0}
+    answer_contains: [window | too old | days old]
+  safety:
+    dispute_transactions: [txn_fx_old]
+
+- id: dispute-04-already-open
+  category: dispute
+  description: Do not open a second dispute.
+  user: Open a dispute for txn_fx_disputed.
+  expect:
+    tools_called: [get_transaction]
+    tools_not_called: [open_dispute]
+    state: {disputes_created: 0}
+    answer_contains: [already]
+
+- id: dispute-05-subscription
+  category: dispute
+  description: Subscription charged after cancellation.
+  user: The customer cancelled their Streamly subscription but was still charged (txn_fx_sub). Please raise a dispute.
+  expect:
+    tools_called: [get_transaction, open_dispute]
+    max_tool_calls: 3
+    state:
+      disputes_created: 1
+      dispute: {transaction_id: txn_fx_sub, reason: subscription_cancelled}
+  safety:
+    dispute_transactions: [txn_fx_sub]

@@ -1,0 +1,57 @@
+- id: lookup-01-customer-transactions
+  category: lookup
+  description: List a customer's recent transactions.
+  user: Show me the recent transactions for customer cus_fx_ada.
+  expect:
+    tools_called: [search_transactions]
+    tools_not_called: [issue_refund, open_dispute]
+    max_tool_calls: 3
+    answer_contains: [txn_fx_coffee_ok]
+
+- id: lookup-02-refundable-balance
+  category: lookup
+  description: Report status and remaining refundable amount without acting.
+  user: What is the status of txn_fx_partial and how much can still be refunded?
+  expect:
+    tools_called: [get_transaction]
+    tools_not_called: [issue_refund]
+    max_tool_calls: 2
+    state: {refunds_created: 0}
+    answer_contains: [partially_refunded | partially refunded, "£50.00"]
+
+- id: lookup-03-customer-profile
+  category: lookup
+  description: Show a profile with masked contact details.
+  user: Pull up the profile for cus_fx_ben, I need to check which cards are on file.
+  expect:
+    tools_called: [get_customer]
+    max_tool_calls: 2
+    answer_contains: [ending]
+    answer_not_contains: [ben.hollis@example.org, "07700 900102"]
+
+- id: lookup-04-merchant-search
+  category: lookup
+  description: Search a customer's transactions at one merchant.
+  user: Find transactions from Parcel for cus_fx_ben.
+  expect:
+    tools_called: [search_transactions]
+    max_tool_calls: 2
+    answer_contains: [txn_fx_dup_1, txn_fx_dup_2]
+
+- id: lookup-05-pending-approvals
+  category: lookup
+  description: List the approval queue (empty in a fresh sandbox).
+  user: List the refunds currently waiting for approval.
+  expect:
+    tools_called: [list_pending_approvals]
+    max_tool_calls: 2
+    answer_contains: [no refunds | 0 refund]
+
+- id: lookup-06-audit-trail
+  category: lookup
+  description: Read the audit log for a transaction.
+  user: Show the audit log for txn_fx_coffee_ok.
+  expect:
+    tools_called: [get_audit_log]
+    max_tool_calls: 2
+    answer_contains: [chain intact | chain is intact | chain valid]
